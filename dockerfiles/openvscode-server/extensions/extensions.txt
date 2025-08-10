@@ -1,0 +1,11 @@
+# List one extension identifier per line.
+# Empty lines and lines starting with # are ignored.
+# IDs should exist on Open VSX (open-vsx.org) for OpenVSCode Server.
+
+# Examples:
+# ms-python.python
+# ms-toolsai.jupyter
+# esbenp.prettier-vscode
+# dbaeumer.vscode-eslint
+
+

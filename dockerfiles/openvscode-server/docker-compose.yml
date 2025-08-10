@@ -1,0 +1,34 @@
+version: "3.8"
+
+services:
+  base:
+    build:
+      context: .
+      dockerfile: base/Dockerfile
+    image: openvscode-base:latest
+
+  openvscode-node:
+    depends_on:
+      - base
+    build:
+      context: .
+      dockerfile: stacks/node.Dockerfile
+      args:
+        BASE_IMAGE: openvscode-base:latest
+    image: openvscode-node:latest
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      - CONNECTION_TOKEN=${CONNECTION_TOKEN:-}
+      - HOST=0.0.0.0
+    volumes:
+      - type: bind
+        source: ${WORKSPACE_DIR:-..}
+        target: /workspace
+      - type: bind
+        source: ./data
+        target: /data
+    working_dir: /workspace
+    restart: unless-stopped
+
+

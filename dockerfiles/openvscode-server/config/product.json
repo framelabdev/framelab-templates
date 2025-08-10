@@ -1,0 +1,15 @@
+{
+  "nameShort": "FrameLab IDE",
+  "nameLong": "FrameLab OpenVSCode Server",
+  "applicationName": "framelab-ovscode",
+  "dataFolderName": ".framelab-ovscode",
+  "welcomePage": "https://openvscode-server.dev/",
+  "documentationUrl": "https://openvscode-server.dev/",
+  "reportIssueUrl": "https://github.com/gitpod-io/openvscode-server/issues/new/choose",
+  "extensionsGallery": {
+    "serviceUrl": "https://open-vsx.org/vscode/gallery",
+    "itemUrl": "https://open-vsx.org/vscode/item"
+  }
+}
+
+
