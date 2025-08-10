@@ -40,6 +40,7 @@ ARG USER_UID=1000
 ARG USER_GID=1000
 RUN groupadd --gid ${USER_GID} ${USERNAME} && \
     useradd --uid ${USER_UID} --gid ${USER_GID} -m ${USERNAME} && \
+    mkdir -p /data/user-data /data/extensions && \
     chown -R ${USERNAME}:${USERNAME} /data
 
 # Copy custom product details (branding)
