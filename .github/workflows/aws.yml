@@ -71,12 +71,10 @@ jobs:
         id: vars
         run: |
           REPO_NAME="${{ matrix.template }}-${{ matrix.os_type }}"
-          IMAGE_TAG="${{ matrix.os_version }}-${{ matrix.ide }}:${GITHUB_SHA::7}"
+          IMAGE_TAG="${{ matrix.os_version }}-${{ matrix.ide }}-${GITHUB_SHA::7}"
           echo "REPO_NAME=$REPO_NAME" >> $GITHUB_ENV
           echo "IMAGE_TAG=$IMAGE_TAG" >> $GITHUB_ENV
           echo "IMAGE_URI=${{ steps.login-ecr.outputs.registry }}/$REPO_NAME:$IMAGE_TAG" >> $GITHUB_ENV
-          cat $GITHUB_ENV
-          echo $IMAGE_URI
 
       # - name: Build, tag, and push image to Amazon ECR
       #   id: build-image

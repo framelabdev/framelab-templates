@@ -27,7 +27,7 @@ WORKDIR ${OPENVSCODE_SERVER_DIR}
 # Download OpenVSCode Server release
 RUN set -eux; \
     curl -fsSL -o /tmp/openvscode.tar.gz \
-      https://github.com/gitpod-io/openvscode-server/releases/download/openvscode-server-v${OPENVSCODE_VERSION}/openvscode-server-v${OPENVSCODE_VERSION}-linux-x64.tar.gz; \
+      https://github.com/gitpod-io/openvscode-server/releases/download/openvscode-server-v1.102.3/openvscode-server-v1.102.3-linux-x64.tar.gz; \
     tar -xzf /tmp/openvscode.tar.gz --strip-components=1 -C ${OPENVSCODE_SERVER_DIR}; \
     rm -f /tmp/openvscode.tar.gz
 

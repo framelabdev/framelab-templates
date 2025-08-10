@@ -4,6 +4,9 @@ set -euo pipefail
 PORT="${PORT:-3000}"
 HOST="${HOST:-0.0.0.0}"
 
+# Ensure required data directories exist (handles empty host bind mount)
+mkdir -p /data/user-data/logs /data/extensions || true
+
 ARGS=(
   "--host" "${HOST}"
   "--port" "${PORT}"
