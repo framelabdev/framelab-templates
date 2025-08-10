@@ -20,6 +20,7 @@ services:
       - "${PORT:-3000}:3000"
     environment:
       - CONNECTION_TOKEN=${CONNECTION_TOKEN:-}
+      - DISABLE_CONNECTION_TOKEN=${DISABLE_CONNECTION_TOKEN:-false}
       - HOST=0.0.0.0
     volumes:
       - type: bind

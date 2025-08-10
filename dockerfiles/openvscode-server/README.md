@@ -49,6 +49,7 @@ Open: `http://localhost:3000` (or the port you set). If `CONNECTION_TOKEN` is se
 - Update `config/product.json` with your product details (name, gallery endpoints, links).
 - Add extension IDs (Open VSX) to `extensions/extensions.txt` to preinstall at build time.
 - Mount your workspace with the `WORKSPACE_DIR` env var in `.env` (defaults to the repo parent directory).
+ - To disable the token (not recommended on public networks), set `DISABLE_CONNECTION_TOKEN=true` in `.env` or remove `CONNECTION_TOKEN` and set `DISABLE_CONNECTION_TOKEN=true`.
 
 #### Notes
 

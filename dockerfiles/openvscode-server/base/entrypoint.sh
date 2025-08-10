@@ -14,6 +14,8 @@ ARGS=(
 
 if [[ -n "${CONNECTION_TOKEN:-}" ]]; then
   ARGS+=("--connection-token" "${CONNECTION_TOKEN}")
+elif [[ "${DISABLE_CONNECTION_TOKEN:-false}" == "true" || "${ALLOW_NO_TOKEN:-false}" == "true" ]]; then
+  ARGS+=("--without-connection-token")
 fi
 
 exec "${OPENVSCODE_SERVER_DIR}/bin/openvscode-server" "${ARGS[@]}"
