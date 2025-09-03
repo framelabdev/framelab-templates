@@ -3,6 +3,7 @@ import argparse
 import logging
 import subprocess
 from pathlib import Path
+from jinja2 import Environment, FileSystemLoader
 
 logging.basicConfig(
     level=logging.INFO,
@@ -28,27 +29,18 @@ def make_tag(args: argparse.Namespace) -> str:
 
 
 def generate_dockerfile(args: argparse.Namespace) -> None:
-    """Generate Dockerfile from external template."""
-    template_path = Path("base/Dockerfile.base")
+    """Generate Dockerfile from Jinja2 template."""
+    template_path = Path("base/base.dockerfile.j2")
     if not template_path.exists():
-        logging.error("Dockerfile.base not found!")
-        raise FileNotFoundError("Dockerfile.base not found.")
+        logging.error("base.dockerfile.j2 template not found!")
+        raise FileNotFoundError("base.dockerfile.j2 template not found.")
 
-    dockerfile_content = template_path.read_text()
+    # Set up Jinja2 environment
+    env = Environment(loader=FileSystemLoader('base'))
+    template = env.get_template('base.dockerfile.j2')
 
-    # Select install command based on OS
-    if args.os_type.lower() == "amazonlinux":
-        install_cmd = (
-            "dnf install -y --setopt=install_weak_deps=False \\"
-            "curl wget git sudo bash ca-certificates shadow-utils hostname && dnf clean all"
-        )
-    else:
-        install_cmd = (
-            "apt-get update && apt-get install -y curl wget git sudo bash locales ca-certificates && rm -rf /var/lib/apt/lists/*"
-        )
-
-    # Replace placeholders
-    dockerfile_content = dockerfile_content.format(
+    # Render template with variables
+    dockerfile_content = template.render(
         os_type=args.os_type,
         os_version=args.os_version,
         openvscode_arch=args.arch,
@@ -57,8 +49,8 @@ def generate_dockerfile(args: argparse.Namespace) -> None:
         username=args.username,
         user_uid=args.uid,
         port=args.port,
-        install_cmd=install_cmd,
     )
+    
     Path("base/Dockerfile.generated").write_text(dockerfile_content)
     logging.info("Dockerfile generated successfully ✅")
 
