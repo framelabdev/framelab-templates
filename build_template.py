@@ -17,21 +17,21 @@ TEMPLATES = {
     "react": {
         "dockerfile_template": "templates/react.dockerfile.j2",
         "config_file": "templates/react/config.yml",
-        "default_port": 5173,
+        "default_port": 3000,
         "runtime": "node",
         "framework": "React.js"
     },
     "angular": {
         "dockerfile_template": "templates/angular.dockerfile.j2",
         "config_file": "templates/angular/config.yml",
-        "default_port": 4200,
+        "default_port": 3000,
         "runtime": "node",
         "framework": "Angular"
     },
     "vue": {
         "dockerfile_template": "templates/vue.dockerfile.j2",
         "config_file": "templates/vue/config.yml",
-        "default_port": 5173,
+        "default_port": 3000,
         "runtime": "node",
         "framework": "Vue.js"
     }
