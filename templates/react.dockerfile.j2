@@ -11,9 +11,13 @@ RUN apt-get update && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
-# Create workspace directory with proper permissions
-RUN mkdir -p /home/framelab/workspace && \
-    chown framelab:framelab /home/framelab/workspace
+# Create framelab user if it doesn't exist and set up workspace
+RUN if ! id framelab >/dev/null 2>&1; then \
+        groupadd -g 1000 framelab && \
+        useradd -m -u 1000 -g 1000 -s /bin/bash framelab; \
+    fi && \
+    mkdir -p /home/framelab/workspace && \
+    chown 1000:1000 /home/framelab/workspace
 
 # Switch back to framelab user
 USER framelab
