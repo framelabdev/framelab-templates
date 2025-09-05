@@ -3,9 +3,13 @@ FROM {{ base_image }}
 # Switch to root to install Node.js
 USER root
 
-# Install Node.js and npm
-RUN curl -fsSL https://deb.nodesource.com/setup_{{ node_version }}.x | bash - && \
-    apt-get install -y nodejs
+# Update package lists and install Node.js and npm
+RUN apt-get update && \
+    apt-get install -y curl ca-certificates gnupg && \
+    curl -fsSL https://deb.nodesource.com/setup_{{ node_version }}.x | bash - && \
+    apt-get install -y nodejs && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 # Switch back to framelab user
 USER framelab
