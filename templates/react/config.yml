@@ -1,0 +1,19 @@
+# React.js Template Configuration
+port: 5173
+node_version: "22"
+package_manager: "npm"
+dev_command: "npm run dev"
+build_command: "npm run build"
+install_command: "npm install"
+
+# Additional packages to install
+additional_packages:
+  - "@types/react"
+  - "@types/react-dom"
+  - "typescript"
+
+# VSCode extensions
+vscode_extensions:
+  - "bradlc.vscode-tailwindcss"
+  - "esbenp.prettier-vscode"
+  - "ms-vscode.vscode-typescript-next"
