@@ -1,0 +1,19 @@
+# Angular Template Configuration
+port: 4200
+node_version: "22"
+package_manager: "npm"
+dev_command: "npm start"
+build_command: "npm run build"
+install_command: "npm install"
+
+# Additional packages to install
+additional_packages:
+  - "@angular/cli"
+  - "typescript"
+
+# VSCode extensions
+vscode_extensions:
+  - "angular.ng-template"
+  - "esbenp.prettier-vscode"
+  - "ms-vscode.vscode-typescript-next"
+  - "bradlc.vscode-tailwindcss"

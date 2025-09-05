@@ -1,0 +1,20 @@
+# Vue.js Template Configuration
+port: 5173
+node_version: "22"
+package_manager: "npm"
+dev_command: "npm run dev"
+build_command: "npm run build"
+install_command: "npm install"
+
+# Additional packages to install
+additional_packages:
+  - "typescript"
+  - "@vue/tsconfig"
+
+# VSCode extensions
+vscode_extensions:
+  - "vue.volar"
+  - "vue.vscode-typescript-vue-plugin"
+  - "esbenp.prettier-vscode"
+  - "ms-vscode.vscode-typescript-next"
+  - "bradlc.vscode-tailwindcss"
