@@ -19,25 +19,28 @@ TEMPLATES = {
         "config_file": "templates/react/config.yml",
         "default_port": 3000,
         "runtime": "node",
-        "framework": "React.js"
+        "framework": "React.js",
+        "version": "v0.0.1"
     },
     "angular": {
         "dockerfile_template": "templates/angular.dockerfile.j2",
         "config_file": "templates/angular/config.yml",
         "default_port": 3000,
         "runtime": "node",
-        "framework": "Angular"
+        "framework": "Angular",
+        "version": "v0.0.1"
     },
     "vue": {
         "dockerfile_template": "templates/vue.dockerfile.j2",
         "config_file": "templates/vue/config.yml",
         "default_port": 3000,
         "runtime": "node",
-        "framework": "Vue.js"
+        "framework": "Vue.js",
+        "version": "v0.0.1"
     }
 }
 
-def load_template_config(template_name: str, user_config_file: str = None) -> Dict[str, Any]:
+def load_template_config(template_name: str, user_config_file: str = None, version_override: str = None) -> Dict[str, Any]:
     """Load template configuration with optional user overrides."""
     template_info = TEMPLATES[template_name]
     
@@ -59,7 +62,8 @@ def load_template_config(template_name: str, user_config_file: str = None) -> Di
     config.update({
         "port": config.get("port", template_info["default_port"]),
         "runtime": template_info["runtime"],
-        "framework": template_info["framework"]
+        "framework": template_info["framework"],
+        "version": version_override or config.get("version", template_info.get("version", "v0.0.1"))
     })
     
     return config
@@ -121,8 +125,11 @@ def build_template_image(template_name: str, base_image: str, config: Dict[str, 
     dockerfile_path.write_text(dockerfile_content)
     logging.info(f"Generated {dockerfile_path}")
     
-    # Build image
-    tag = f"{template_name}-{base_image.replace(':', '-')}"
+    # Build image with dynamic tag
+    template_info = TEMPLATES[template_name]
+    version = config.get("version", template_info.get("version", "v0.0.1"))
+    base_image_name = base_image.split(":")[0].split("/")[-1]  # Extract base image name
+    tag = f"{template_name}-{version}"
     build_cmd = ["docker", "build", "-f", str(dockerfile_path), "-t", tag, "."]
     
     run_command(build_cmd, dry_run=args.dry_run)
@@ -130,9 +137,19 @@ def build_template_image(template_name: str, base_image: str, config: Dict[str, 
     
     return tag
 
-def push_template_to_ecr(template_tag: str, args: argparse.Namespace) -> str:
-    """Push template image to ECR."""
-    ecr_url = f"{args.ecr_repo}:{template_tag}"
+def push_template_to_ecr(template_tag: str, template_name: str, base_image: str, config: Dict[str, Any], args: argparse.Namespace) -> str:
+    """Push template image to ECR with dynamic repository and tag."""
+    # Extract base image name (e.g., "vscode-ubuntu-22.04" from "vscode-ubuntu-22.04-base")
+    base_image_name = base_image.replace("-base", "")
+    
+    # Get version from config or template defaults
+    template_info = TEMPLATES[template_name]
+    version = config.get("version", template_info.get("version", "v0.0.1"))
+    
+    # Build dynamic ECR URL: base_repo/templates/base_image:template_name-version
+    ecr_repo_base = args.ecr_repo.rstrip("/")
+    ecr_url = f"{ecr_repo_base}/templates/{base_image_name}:{template_name}-{version}"
+    
     run_command(["docker", "tag", template_tag, ecr_url], dry_run=args.dry_run)
     run_command(["docker", "push", ecr_url], dry_run=args.dry_run)
     logging.info("Template image pushed: %s ✅", ecr_url)
@@ -148,14 +165,14 @@ def build_multiple_templates(templates: list[str], base_image: str, args: argpar
         logging.info(f"Building {template} template from base: {base_image}")
         
         # Load configuration
-        config = load_template_config(template, args.config)
+        config = load_template_config(template, args.config, args.version)
         
         # Build template image
         template_tag = build_template_image(template, base_image, config, args)
         
         # Push to ECR if requested
         if not args.skip_push:
-            push_template_to_ecr(template_tag, args)
+            push_template_to_ecr(template_tag, template, base_image, config, args)
 
 def main():
     parser = argparse.ArgumentParser(description="Build template images from base image")
@@ -175,11 +192,12 @@ def main():
     
     # Configuration
     parser.add_argument("--config", help="Custom configuration file (YAML)")
+    parser.add_argument("--version", help="Override template version (e.g., v1.0.0)")
     
     # ECR settings
     parser.add_argument("--ecr-repo", 
-                       default="208249468771.dkr.ecr.us-east-1.amazonaws.com/framelab/templates",
-                       help="ECR repository for templates")
+                       default="208249468771.dkr.ecr.us-east-1.amazonaws.com/framelab",
+                       help="ECR repository base URL for templates")
     parser.add_argument("--skip-push", action="store_true", 
                        help="Skip pushing to ECR")
     
