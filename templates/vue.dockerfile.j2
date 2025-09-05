@@ -1,20 +1,26 @@
 FROM {{ base_image }}
 
-# Set working directory
-WORKDIR /workspace
+# Switch to root to install Node.js
+USER root
 
 # Install Node.js and npm
 RUN curl -fsSL https://deb.nodesource.com/setup_{{ node_version }}.x | bash - && \
     apt-get install -y nodejs
 
+# Switch back to framelab user
+USER framelab
+
+# Set working directory
+WORKDIR /home/framelab/workspace
+
 # Copy package files
-COPY templates/vue/package*.json ./
+COPY --chown=framelab:framelab templates/vue/package*.json ./
 
 # Install dependencies
 RUN {{ install_command }}
 
 # Copy source code
-COPY templates/vue/ .
+COPY --chown=framelab:framelab templates/vue/ .
 
 # Install additional packages if specified
 {% if additional_packages %}
