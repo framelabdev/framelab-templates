@@ -4,10 +4,16 @@ import logging
 import subprocess
 from pathlib import Path
 from jinja2 import Environment, FileSystemLoader
+from constants import (
+    DEFAULT_IDE, DEFAULT_OS_TYPE, DEFAULT_OS_VERSION, DEFAULT_ARCH,
+    DEFAULT_VSCODE_VERSION, DEFAULT_HOSTNAME, DEFAULT_USERNAME, DEFAULT_UID,
+    DEFAULT_PORT, DEFAULT_BASE_ECR_REPO, BASE_DOCKERFILE_TEMPLATE,
+    BASE_DOCKERFILE_GENERATED, LOGGING_FORMAT, LOGGING_LEVEL
+)
 
 logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
+    level=getattr(logging, LOGGING_LEVEL),
+    format=LOGGING_FORMAT,
 )
 
 def run_command(cmd: list[str], dry_run: bool = False) -> None:
@@ -30,7 +36,7 @@ def make_tag(args: argparse.Namespace) -> str:
 
 def generate_dockerfile(args: argparse.Namespace) -> None:
     """Generate Dockerfile from Jinja2 template."""
-    template_path = Path("base/base.dockerfile.j2")
+    template_path = Path(BASE_DOCKERFILE_TEMPLATE)
     if not template_path.exists():
         logging.error("base.dockerfile.j2 template not found!")
         raise FileNotFoundError("base.dockerfile.j2 template not found.")
@@ -51,15 +57,15 @@ def generate_dockerfile(args: argparse.Namespace) -> None:
         port=args.port,
     )
     
-    Path("base/Dockerfile.generated").write_text(dockerfile_content)
-    logging.info("Dockerfile generated successfully ✅")
+    Path(BASE_DOCKERFILE_GENERATED).write_text(dockerfile_content)
+    logging.info("Dockerfile generated successfully")
 
 
 def build_image(args: argparse.Namespace) -> str:
     """Build the Docker image and return the tag."""
     tag = make_tag(args)
-    run_command(["docker", "build", "-t", tag, ".", "-f", "base/Dockerfile.generated"], dry_run=args.dry_run)
-    logging.info("Image built: %s ✅", tag)
+    run_command(["docker", "build", "-t", tag, ".", "-f", BASE_DOCKERFILE_GENERATED], dry_run=args.dry_run)
+    logging.info("Image built: %s", tag)
     return tag
 
 
@@ -68,7 +74,7 @@ def push_ecr(args: argparse.Namespace, tag: str) -> str:
     ecr_url = f"{args.ecr_repo}:{tag}"
     run_command(["docker", "tag", tag, ecr_url], dry_run=args.dry_run)
     run_command(["docker", "push", ecr_url], dry_run=args.dry_run)
-    logging.info("Image pushed: %s ✅", ecr_url)
+    logging.info("Image pushed: %s", ecr_url)
     return ecr_url
 
 
@@ -94,33 +100,33 @@ def main():
     parser = argparse.ArgumentParser(
         description="Generate Dockerfile, build image, and push to ECR."
     )
-    parser.add_argument("--ide", default="vscode", help="IDE to use (default: vscode)")
+    parser.add_argument("--ide", default=DEFAULT_IDE, help=f"IDE to use (default: {DEFAULT_IDE})")
     parser.add_argument(
-        "--os-type", default="ubuntu", help="Base OS type (default: ubuntu)"
+        "--os-type", default=DEFAULT_OS_TYPE, help=f"Base OS type (default: {DEFAULT_OS_TYPE})"
     )
     parser.add_argument(
-        "--os-version", default="22.04", help="Base OS version (default: 22.04)"
+        "--os-version", default=DEFAULT_OS_VERSION, help=f"Base OS version (default: {DEFAULT_OS_VERSION})"
     )
     parser.add_argument(
-        "--arch", default="x64", help="OpenVSCode architecture (default: x64)"
+        "--arch", default=DEFAULT_ARCH, help=f"OpenVSCode architecture (default: {DEFAULT_ARCH})"
     )
     parser.add_argument(
         "--vscode-version",
-        default="1.103.1",
-        help="OpenVSCode version (default: 1.103.1)",
+        default=DEFAULT_VSCODE_VERSION,
+        help=f"OpenVSCode version (default: {DEFAULT_VSCODE_VERSION})",
     )
     parser.add_argument(
-        "--hostname", default="framelab", help="Container hostname (default: framelab)"
+        "--hostname", default=DEFAULT_HOSTNAME, help=f"Container hostname (default: {DEFAULT_HOSTNAME})"
     )
     parser.add_argument(
-        "--username", default="framelab", help="Non-root username (default: framelab)"
+        "--username", default=DEFAULT_USERNAME, help=f"Non-root username (default: {DEFAULT_USERNAME})"
     )
-    parser.add_argument("--uid", default="1000", help="User UID (default: 1000)")
-    parser.add_argument("--port", default="3000", help="Expose port (default: 3000)")
+    parser.add_argument("--uid", default=DEFAULT_UID, help=f"User UID (default: {DEFAULT_UID})")
+    parser.add_argument("--port", default=DEFAULT_PORT, help=f"Expose port (default: {DEFAULT_PORT})")
     parser.add_argument(
         "--ecr-repo",
-        default="208249468771.dkr.ecr.us-east-1.amazonaws.com/framelab/base-images",
-        help="ECR Repo URL for pushing the image",
+        default=DEFAULT_BASE_ECR_REPO,
+        help=f"ECR Repo URL for pushing the image (default: {DEFAULT_BASE_ECR_REPO})",
     )
     parser.add_argument(
         "--skip-build",

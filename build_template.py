@@ -6,39 +6,15 @@ import yaml
 from pathlib import Path
 from typing import Dict, Any
 from jinja2 import Environment, FileSystemLoader
-
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(message)s",
+from constants import (
+    TEMPLATES, DEFAULT_TEMPLATE_VERSION, DEFAULT_TEMPLATE_ECR_REPO,
+    LOGGING_FORMAT, LOGGING_LEVEL
 )
 
-# Template configurations
-TEMPLATES = {
-    "react": {
-        "dockerfile_template": "templates/react.dockerfile.j2",
-        "config_file": "templates/react/config.yml",
-        "default_port": 3000,
-        "runtime": "node",
-        "framework": "React.js",
-        "version": "v0.0.1"
-    },
-    "angular": {
-        "dockerfile_template": "templates/angular.dockerfile.j2",
-        "config_file": "templates/angular/config.yml",
-        "default_port": 3000,
-        "runtime": "node",
-        "framework": "Angular",
-        "version": "v0.0.1"
-    },
-    "vue": {
-        "dockerfile_template": "templates/vue.dockerfile.j2",
-        "config_file": "templates/vue/config.yml",
-        "default_port": 3000,
-        "runtime": "node",
-        "framework": "Vue.js",
-        "version": "v0.0.1"
-    }
-}
+logging.basicConfig(
+    level=getattr(logging, LOGGING_LEVEL),
+    format=LOGGING_FORMAT,
+)
 
 def load_template_config(template_name: str, user_config_file: str = None, version_override: str = None) -> Dict[str, Any]:
     """Load template configuration with optional user overrides."""
@@ -63,7 +39,7 @@ def load_template_config(template_name: str, user_config_file: str = None, versi
         "port": config.get("port", template_info["default_port"]),
         "runtime": template_info["runtime"],
         "framework": template_info["framework"],
-        "version": version_override or config.get("version", template_info.get("version", "v0.0.1"))
+        "version": version_override or config.get("version", template_info.get("version", DEFAULT_TEMPLATE_VERSION))
     })
     
     return config
@@ -127,7 +103,7 @@ def build_template_image(template_name: str, base_image: str, config: Dict[str, 
     
     # Build image with dynamic tag
     template_info = TEMPLATES[template_name]
-    version = config.get("version", template_info.get("version", "v0.0.1"))
+    version = config.get("version", template_info.get("version", DEFAULT_TEMPLATE_VERSION))
     base_image_name = base_image.split(":")[0].split("/")[-1]  # Extract base image name
     tag = f"{template_name}-{version}"
     build_cmd = ["docker", "build", "-f", str(dockerfile_path), "-t", tag, "."]
@@ -144,7 +120,7 @@ def push_template_to_ecr(template_tag: str, template_name: str, base_image: str,
     
     # Get version from config or template defaults
     template_info = TEMPLATES[template_name]
-    version = config.get("version", template_info.get("version", "v0.0.1"))
+    version = config.get("version", template_info.get("version", DEFAULT_TEMPLATE_VERSION))
     
     # Build dynamic ECR URL: base_repo/templates/base_image:template_name-version
     ecr_repo_base = args.ecr_repo.rstrip("/")
@@ -196,8 +172,8 @@ def main():
     
     # ECR settings
     parser.add_argument("--ecr-repo", 
-                       default="208249468771.dkr.ecr.us-east-1.amazonaws.com/framelab",
-                       help="ECR repository base URL for templates")
+                       default=DEFAULT_TEMPLATE_ECR_REPO,
+                       help=f"ECR repository base URL for templates (default: {DEFAULT_TEMPLATE_ECR_REPO})")
     parser.add_argument("--skip-push", action="store_true", 
                        help="Skip pushing to ECR")
     

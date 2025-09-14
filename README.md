@@ -8,9 +8,11 @@ This repository contains a Jinja2 template and build script for generating Docke
 - `base/Dockerfile.j2` - Advanced Jinja2 template with conditional logic for different OS types
 
 ### Build Scripts
-- `buildbase.py` - Build script using Jinja2 templating
+- `buildbase.py` - Build script using Jinja2 templating for base images
+- `build_template.py` - Build script for framework-specific template images
 
 ### Configuration
+- `constants.py` - Centralized default values and configurations
 - `requirements.txt` - Python dependencies
 
 ## Usage
@@ -99,9 +101,22 @@ RUN echo {{ hostname }} > /etc/hostname
 
 - `base/Dockerfile.generated` - The generated Dockerfile from the Jinja2 template
 
+## Configuration Management
+
+The repository uses a centralized `constants.py` file for all default values:
+
+- **Base Image Defaults**: IDE, OS type/version, architecture, VSCode version, user settings
+- **ECR Repository Defaults**: Separate defaults for base and template repositories
+- **Template Defaults**: Version, runtime, framework-specific configurations
+- **File Paths**: Centralized path constants for templates and generated files
+- **Logging Configuration**: Standardized logging format and level
+
+This approach ensures consistency across all build scripts and makes maintenance easier.
+
 ## Dependencies
 
 - Python 3.7+
 - Jinja2 >= 3.1.0
+- PyYAML >= 6.0
 - Docker (for building images)
 - AWS CLI (for ECR operations)
